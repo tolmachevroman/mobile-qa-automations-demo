@@ -1,0 +1,201 @@
+# jobs/user_login.yaml
+job_id: "user_login"
+version: "2.0.0"
+title: "User authentication and login flow"
+epic: "Authentication"
+
+story: |
+  As a user who wants to access the app
+  I need to securely log in with my credentials
+  So that I can access my personal dashboard
+
+acceptance_criteria:
+  - User can enter email address with real-time validation
+  - User can enter password securely (masked input)
+  - Login button is only enabled when both fields are valid
+  - Successful login navigates to dashboard screen
+  - Failed login shows appropriate error message with retry option
+  - Form handles network errors gracefully
+  - Loading state is shown during authentication
+  - Form validation provides immediate feedback
+
+test_scenarios:
+  successful_login:
+    description: "Valid credentials lead to dashboard screen"
+    priority: "critical"
+    preconditions:
+      - App is launched and displays login screen
+      - User has valid registered account
+      - Network connection is available
+    steps:
+      - "Verify login screen displays correctly with all required elements"
+      - "Enter valid email 'test@company.com' in email field"
+      - "Verify email field shows no validation error"
+      - "Enter valid password 'Password123!' in password field"
+      - "Verify login button becomes enabled"
+      - "Tap login button"
+      - "Verify loading indicator appears"
+      - "Verify loading indicator disappears after successful login"
+      - "Verify navigation to dashboard screen"
+      - "Verify dashboard displays welcome message with user email"
+
+  invalid_email_format:
+    description: "Invalid email format shows validation error"
+    priority: "high"
+    steps:
+      - "Enter invalid email 'invalid-email' in email field"
+      - "Tap outside email field to trigger validation"
+      - "Verify email validation error message 'Please enter a valid email address'"
+      - "Verify login button remains disabled"
+      - "Clear email field"
+      - "Enter valid email format"
+      - "Verify validation error disappears"
+
+  empty_credentials:
+    description: "Empty fields prevent login attempt and show validation"
+    priority: "high"
+    steps:
+      - "Verify login button is disabled on app launch"
+      - "Enter email then clear it"
+      - "Verify required field error appears for email"
+      - "Enter password then clear it"
+      - "Verify required field error appears for password"
+      - "Verify login button remains disabled"
+
+  invalid_credentials:
+    description: "Wrong credentials show authentication error"
+    priority: "critical"
+    steps:
+      - "Enter valid email format but wrong credentials"
+      - "Tap login button"
+      - "Verify loading indicator appears"
+      - "Verify authentication error message 'Invalid email or password'"
+      - "Verify retry button is available"
+      - "Verify form fields remain populated"
+
+  network_error:
+    description: "Network failures are handled gracefully"
+    priority: "medium"
+    preconditions:
+      - Network connection is disabled or unstable
+    steps:
+      - "Enter valid credentials"
+      - "Tap login button"
+      - "Verify loading indicator appears"
+      - "Verify network error message 'Unable to connect. Please check your internet connection.'"
+      - "Verify retry button is available"
+      - "Enable network connection"
+      - "Tap retry button"
+      - "Verify successful login on retry"
+
+  server_error_500:
+    description: "Internal server errors are handled with appropriate messaging"
+    priority: "high"
+    steps:
+      - "Enter valid credentials"
+      - "Tap login button with server returning 500 error"
+      - "Verify loading indicator appears"
+      - "Verify server error message 'Internal server error. Please try again later.'"
+      - "Verify retry option is available"
+
+  unauthorized_401:
+    description: "Authentication failures return proper error messages"
+    priority: "critical"
+    steps:
+      - "Enter credentials that return 401 from server"
+      - "Tap login button"
+      - "Verify authentication error message 'Authentication failed. Please check your credentials.'"
+      - "Verify form fields remain populated for retry"
+
+  service_unavailable_503:
+    description: "Service unavailable errors are handled gracefully"
+    priority: "medium"
+    steps:
+      - "Attempt login when service returns 503"
+      - "Verify service unavailable message 'Service temporarily unavailable. Please try again later.'"
+      - "Verify retry mechanism is available"
+
+  rate_limited_429:
+    description: "Rate limiting is communicated clearly to users"
+    priority: "high"
+    steps:
+      - "Attempt multiple rapid login requests"
+      - "Verify rate limit error message 'Too many attempts. Please try again in a few minutes.'"
+      - "Verify login form is temporarily disabled or shows cooldown"
+
+  malformed_response:
+    description: "Malformed API responses are handled without crashes"
+    priority: "medium"
+    steps:
+      - "Trigger login with malformed JSON response"
+      - "Verify graceful error handling 'Invalid server response. Please try again.'"
+      - "Verify application remains stable"
+
+  maintenance_mode:
+    description: "Maintenance mode is communicated to users"
+    priority: "low"
+    steps:
+      - "Attempt login during maintenance window"
+      - "Verify maintenance message 'Service is under maintenance. Please try again later.'"
+      - "Verify appropriate user guidance is provided"
+
+  password_visibility_toggle:
+    description: "Password visibility can be toggled"
+    priority: "medium"
+    steps:
+      - "Enter password in password field"
+      - "Verify password is masked by default"
+      - "Tap password visibility toggle icon"
+      - "Verify password becomes visible"
+      - "Tap password visibility toggle icon again"
+      - "Verify password becomes masked again"
+
+validation_points:
+  ui_elements:
+    - id: "email_input_field"
+      testTag: "login_email_field"
+      requirement: "Must accept valid email format and show real-time validation"
+    - id: "password_input_field"
+      testTag: "login_password_field"
+      requirement: "Must mask input, support secure text entry, and have visibility toggle"
+    - id: "login_button"
+      testTag: "login_submit_button"
+      requirement: "Must be disabled until valid input provided, show loading state"
+    - id: "error_message_display"
+      testTag: "login_error_message"
+      requirement: "Must show clear error messages for different failure types"
+    - id: "loading_indicator"
+      testTag: "login_loading_indicator"
+      requirement: "Must show during authentication process"
+    - id: "password_visibility_toggle"
+      testTag: "password_visibility_toggle"
+      requirement: "Must toggle password visibility"
+
+  business_rules:
+    - rule: "Email validation must follow RFC 5322 standard"
+    - rule: "Password must be at least 8 characters"
+    - rule: "Login attempt must complete within 15 seconds"
+    - rule: "Error messages must be user-friendly, not technical"
+    - rule: "Form state must persist during configuration changes"
+    - rule: "Loading state must prevent multiple simultaneous login attempts"
+
+data_requirements:
+  authentication_request:
+    email: "string (valid email format)"
+    password: "string (minimum 8 characters)"
+  
+  authentication_response:
+    success:
+      user_id: "string"
+      email: "string"
+      access_token: "string"
+    failure:
+      error_code: "string"
+      error_message: "string"
+
+platforms:
+  android:
+    test_class: "LoginScreenTest"
+    package: "com.demo.automation.qa.ui.auth"
+    screen_class: "LoginScreen"
+    viewmodel_class: "LoginViewModel"

@@ -5,12 +5,12 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import com.demo.automation.qa.ui.auth.LoginScreen
+import com.demo.automation.qa.ui.dashboard.DashboardScreen
 import com.demo.automation.qa.ui.theme.QAAutomationDemoTheme
 
 class MainActivity : ComponentActivity() {
@@ -19,11 +19,11 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             QAAutomationDemoTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    QADemoApp()
                 }
             }
         }
@@ -31,17 +31,24 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
+fun QADemoApp() {
+    var currentScreen by remember { mutableStateOf("login") }
+    var userEmail by remember { mutableStateOf("") }
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    QAAutomationDemoTheme {
-        Greeting("Android")
+    when (currentScreen) {
+        "login" -> {
+            LoginScreen(
+                onLoginSuccess = { email ->
+                    userEmail = email
+                    currentScreen = "dashboard"
+                }
+            )
+        }
+
+        "dashboard" -> {
+            DashboardScreen(
+                userEmail = userEmail
+            )
+        }
     }
 }
