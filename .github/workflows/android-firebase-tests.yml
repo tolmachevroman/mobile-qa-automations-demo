@@ -88,10 +88,22 @@ jobs:
         with:
           project_id: ${{ env.FIREBASE_PROJECT_ID }}
 
+      - name: Verify Firebase setup
+        run: |
+          echo "🔍 Debugging Firebase setup..."
+          gcloud auth list
+          gcloud config list
+          echo "Project ID: ${{ env.FIREBASE_PROJECT_ID }}"
+          gcloud projects list | head -5
+
       - name: Test on ${{ matrix.device.name }}
         timeout-minutes: 8
         run: |
-          echo " Testing all 17 YAML scenarios on ${{ matrix.device.name }}"
+          echo "🚀 Testing all 17 YAML scenarios on ${{ matrix.device.name }}"
+          
+          # Enable Firebase Test Lab API
+          gcloud services enable testing.googleapis.com
+          
           gcloud firebase test android run \
             --type instrumentation \
             --app apks/app-debug.apk \
@@ -99,7 +111,10 @@ jobs:
             --device model=${{ matrix.device.model }},version=${{ matrix.device.version }} \
             --timeout 7m \
             --results-bucket=${{ env.RESULTS_BUCKET }} \
-            --results-dir=matrix-${{ matrix.device.model }}-${{ matrix.device.version }}
+            --results-dir=matrix-${{ matrix.device.model }}-${{ matrix.device.version }} \
+            --record-video \
+            --performance-metrics \
+            --directories-to-pull /sdcard/Pictures,/sdcard/DCIM
 
       - name: Success
         run: |
