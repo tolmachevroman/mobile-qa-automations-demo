@@ -1,0 +1,64 @@
+name: iOS Tests
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'ios/**'
+      - '.github/workflows/ios-tests.yml'
+  push:
+    branches: [ main ]
+    paths:
+      - 'ios/**'
+
+jobs:
+  ios-tests:
+    runs-on: ubuntu-latest # Changed to ubuntu for now since no iOS project exists yet
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: iOS Project Check
+        run: |
+          echo "# 📱 iOS Project Status" > ios-status.md
+          echo "" >> ios-status.md
+          if [ -d "ios" ]; then
+            echo "✅ iOS directory found" >> ios-status.md
+            echo "📂 Contents:" >> ios-status.md
+            ls -la ios/ >> ios-status.md
+          else
+            echo "⚠️ iOS directory not found - iOS project not yet implemented" >> ios-status.md
+            echo "This is expected for the current demo phase." >> ios-status.md
+          fi
+          
+          cat ios-status.md
+
+      - name: Upload iOS status
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-project-status
+          path: ios-status.md
+
+      - name: Comment PR with iOS status
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            let report = "# 📱 iOS Workflow Status\n\n";
+            
+            try {
+              const status = fs.readFileSync('ios-status.md', 'utf8');
+              report += status;
+            } catch (e) {
+              report += "⚠️ iOS project not yet implemented in this demo repository.\n";
+              report += "Currently focusing on Android implementation with YAML-driven testing.\n";
+            }
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: report
+            });
