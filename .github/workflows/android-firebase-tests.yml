@@ -102,7 +102,7 @@ jobs:
             --results-dir=matrix-${{ matrix.device.model }}-${{ matrix.device.version }}
 
       - name: Success
-        run:
+        run: |
           echo "✅ ${{ matrix.device.name }}: All YAML-driven scenarios verified!"
 
   summary:
