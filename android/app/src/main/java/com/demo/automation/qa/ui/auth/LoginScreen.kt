@@ -170,6 +170,12 @@ fun LoginScreen(
         Button(
             onClick = { viewModel.login() },
             enabled = uiState.isLoginButtonEnabled && !uiState.isLoading,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = androidx.compose.ui.graphics.Color(0xFF4CAF50), // Vibrant green
+                contentColor = androidx.compose.ui.graphics.Color.White,
+                disabledContainerColor = androidx.compose.ui.graphics.Color.Gray,
+                disabledContentColor = androidx.compose.ui.graphics.Color.White
+            ),
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp)
@@ -177,17 +183,15 @@ fun LoginScreen(
         ) {
             if (uiState.isLoading) {
                 CircularProgressIndicator(
-                    modifier = Modifier
-                        .size(24.dp)
-                        .testTag("login_loading_indicator"),
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    strokeWidth = 2.dp
+                    color = androidx.compose.ui.graphics.Color.White,
+                    modifier = Modifier.size(24.dp)
                 )
             } else {
                 Text(
                     text = "Sign In",
                     fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium
+                    fontWeight = FontWeight.Medium,
+                    color = androidx.compose.ui.graphics.Color.White
                 )
             }
         }
