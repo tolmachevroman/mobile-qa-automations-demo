@@ -110,13 +110,13 @@ jobs:
       - name: Test on ${{ matrix.device_name }}
         timeout-minutes: 8
         run: |
-          echo " Testing all 17 YAML scenarios on ${{ matrix.device_name }}"
+          echo "🧪 Testing all 17 YAML scenarios on ${{ matrix.device_name }}"
           
           # Run Firebase Test Lab (without trying to enable APIs)
           gcloud firebase test android run \
             --type instrumentation \
-            --app apks/android/app/build/outputs/apk/debug/app-debug.apk \
-            --test apks/android/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk \
+            --app apks/debug/app-debug.apk \
+            --test apks/androidTest/debug/app-debug-androidTest.apk \
             --device model=${{ matrix.device_model }},version=${{ matrix.device_version }} \
             --timeout 7m \
             --record-video \
