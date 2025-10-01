@@ -18,6 +18,7 @@ on:
 jobs:
   # Check if we need to run both platforms
   changes:
+    name: Detect Changes
     runs-on: ubuntu-latest
     outputs:
       android: ${{ steps.changes.outputs.android }}
@@ -38,6 +39,7 @@ jobs:
 
   # Create unified report (always runs)
   unified-report:
+    name: Unified Report
     needs: changes
     runs-on: ubuntu-latest
     
