@@ -101,6 +101,12 @@ jobs:
           echo "Project ID: ${{ env.FIREBASE_PROJECT_ID }}"
           gcloud projects list | head -5
 
+      - name: List downloaded files
+        run: |
+          echo " Checking downloaded APK files..."
+          ls -la apks/
+          find apks/ -name "*.apk" -type f
+
       - name: Test on ${{ matrix.device_name }}
         timeout-minutes: 8
         run: |
@@ -109,8 +115,8 @@ jobs:
           # Run Firebase Test Lab (without trying to enable APIs)
           gcloud firebase test android run \
             --type instrumentation \
-            --app apks/app-debug.apk \
-            --test apks/app-debug-androidTest.apk \
+            --app apks/android/app/build/outputs/apk/debug/app-debug.apk \
+            --test apks/android/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk \
             --device model=${{ matrix.device_model }},version=${{ matrix.device_version }} \
             --timeout 7m \
             --record-video \
