@@ -12,7 +12,6 @@ on:
 
 env:
   FIREBASE_PROJECT_ID: mobile-qa-automations-demo
-  RESULTS_BUCKET: gs://mobile-qa-automations-demo-test-results
 
 jobs:
   build-apks:
@@ -114,8 +113,6 @@ jobs:
             --test apks/app-debug-androidTest.apk \
             --device model=${{ matrix.device_model }},version=${{ matrix.device_version }} \
             --timeout 7m \
-            --results-bucket=${{ env.RESULTS_BUCKET }} \
-            --results-dir=matrix-${{ matrix.device_model }}-${{ matrix.device_version }} \
             --record-video \
             --performance-metrics
 
