@@ -16,6 +16,7 @@ env:
 
 jobs:
   build-apks:
+    name: Build APKs
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -56,18 +57,23 @@ jobs:
           retention-days: 1
 
   firebase-matrix:
+    name: Test on ${{ matrix.device_name }}
     needs: build-apks
     runs-on: ubuntu-latest
     timeout-minutes: 10
     
     strategy:
       matrix:
-        device:
-          - { model: "Pixel2", version: "28", name: "Pixel 2 API 28" }
-          - { model: "Pixel2", version: "30", name: "Pixel 2 API 30" }
-          - { model: "NexusLowRes", version: "29", name: "Nexus Low Res API 29" }
-    
-    name: 🔥 ${{ matrix.device.name }}
+        include:
+          - device_model: "Pixel2.arm"
+            device_version: "28"
+            device_name: "Pixel 2 API 28"
+          - device_model: "Pixel2.arm"
+            device_version: "30"
+            device_name: "Pixel 2 API 30"
+          - device_model: "MediumPhone.arm"
+            device_version: "29"
+            device_name: "Medium Phone API 29"
     
     steps:
       - uses: actions/checkout@v4
@@ -96,26 +102,26 @@ jobs:
           echo "Project ID: ${{ env.FIREBASE_PROJECT_ID }}"
           gcloud projects list | head -5
 
-      - name: Test on ${{ matrix.device.name }}
+      - name: Test on ${{ matrix.device_name }}
         timeout-minutes: 8
         run: |
-          echo " Testing all 17 YAML scenarios on ${{ matrix.device.name }}"
+          echo " Testing all 17 YAML scenarios on ${{ matrix.device_name }}"
           
           # Run Firebase Test Lab (without trying to enable APIs)
           gcloud firebase test android run \
             --type instrumentation \
             --app apks/app-debug.apk \
             --test apks/app-debug-androidTest.apk \
-            --device model=${{ matrix.device.model }},version=${{ matrix.device.version }} \
+            --device model=${{ matrix.device_model }},version=${{ matrix.device_version }} \
             --timeout 7m \
             --results-bucket=${{ env.RESULTS_BUCKET }} \
-            --results-dir=matrix-${{ matrix.device.model }}-${{ matrix.device.version }} \
+            --results-dir=matrix-${{ matrix.device_model }}-${{ matrix.device_version }} \
             --record-video \
             --performance-metrics
 
       - name: Success
         run: |
-          echo "✅ ${{ matrix.device.name }}: All YAML-driven scenarios verified!"
+          echo "✅ ${{ matrix.device_name }}: All YAML-driven scenarios verified!"
 
   summary:
     needs: firebase-matrix
